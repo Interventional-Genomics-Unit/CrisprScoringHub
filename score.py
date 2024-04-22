@@ -9,13 +9,11 @@ import tensorflow.compat.v1 as tf1
 from tensorflow.keras.models import load_model
 # Project Modules
 from featurization import featurize_data
-from models.deepcas_models import DeepCas9
+from deepcas_model import DeepCas9
 
 
 def load_model_params(score_name: str, models_dir: str):
     try:
-        # dirname = os.path.dirname(os.path.realpath(__file__)).replace('py/','')
-        #dirname = '/home/thudson/projects/editability'
         if score_name == 'cfd':
             mm_scores = pickle.load(open(models_dir + '/mismatch_score.pkl', 'rb'))
             pam_scores = pickle.load(open(models_dir + '/PAM_scores.pkl', 'rb'))
@@ -68,12 +66,6 @@ def preprocess_seq(data):
     return DATA_X
 
 
-##########
-##
-##                   DANIEL MAKE TENSORFLOR STOP YELLING AT ME!!!!
-##   it's giving me some warning about keras conv. layers but still runs
-##
-##########
 
 def deepspcas9(cas9_sites, models_dir):
     '''
@@ -349,6 +341,12 @@ def cfd_score(seq1, seq2, models_dir):
     return round(score,4)
 
 
+def cfd_scores(seqs,models_dir):
+    scores = []
+    for s in seqs:
+        seq1, seq2 = seqs
+        scores.append(cfd_score(seq1, seq2, models_dir))
+
 def cfd_spec_score(sum_cfd_scores):
     '''
     on_target_seq is spacer site and off_target includes pam
@@ -357,3 +355,42 @@ def cfd_spec_score(sum_cfd_scores):
     guide_cfd_score = 100 / (100+sum_cfd_scores)
     guide_cfd_score = round(guide_cfd_score*100,2)
     return guide_cfd_score
+
+
+def score(input,score_name,models_dir):
+    #input = '/home/thudson/projects/Azimuth_updated/test/cfd_input.txt'
+    score_dict = {'name': [],
+                  'grna_seq':[],
+                  'context_seq':[]}
+
+    with open(input,"r") as inp:
+        for line in inp:
+            if line.startswith('name')==False:
+                name,grna_seq,context_seq = line.strip().split("\t")
+                score_dict['name'].append(name)
+                score_dict['grna_seq'].append(grna_seq)
+                score_dict['context_seq'].append(context_seq)
+
+    if score_name == 'cfd':
+        scores = []
+        for seqs in zip(score_dict['grna_seq'], score_dict['context_seq']):
+            seq1,seq2 = seqs
+            scores.append(cfd_score(seq1[:-3], seq2, models_dir))
+
+    if score_name == 'azimuth':
+        pass
+    if score_name == 'doench14':
+        pass
+
+    if score_name == 'deepcpf1':
+        scores = deepcpf1(score_dict['context_seq'], models_dir)
+        scores = [round(x[0],4) for x in scores]
+
+    if score_name == 'deepspcas9':
+        pass
+    if score_name == 'oof':
+        pass
+
+
+
+models_dir = dirname = os.path.dirname(os.path.realpath(__file__))+ "/models/"

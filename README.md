@@ -20,9 +20,21 @@ The CrisprScoringHub pipeline requires a input text file, output text file, and 
 
 Below is an example ``input.txt`` file::
 
-  name	grna_seq	context_seq
-  guide1	GTGCGGCTGGCCCAGGACCTAGG	CTTGTGCGGCTGGCCCAGGACCTAGGCGAG
-  guide2  CATGGTGCAGCTAAAGGCCCAGG	CCCTCATGGTGCAGCTAAAGGCCCAGGAGC
+    name	grna_seq	context_seq
+    guide1	GTGCGGCTGGCCCAGGACCTAGG	CTTGTGCGGCTGGCCCAGGACCTAGGCGAG
+    guide2  CATGGTGCAGCTAAAGGCCCAGG	CCCTCATGGTGCAGCTAAAGGCCCAGGAGC
+
+
+## Score Parameters
+
+### Azimuth
+### DeepSpCas9
+### CFD
+### OOF
+### DeepCpf1
+
+
+    
 
 
 

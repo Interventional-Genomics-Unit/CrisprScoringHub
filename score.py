@@ -2,6 +2,8 @@
 from math import exp
 import pickle
 import re
+import argparse
+import os
 # Installed Modules
 import pandas as pd
 import numpy as np
@@ -30,7 +32,6 @@ def load_model_params(score_name: str, models_dir: str):
             return model1, model2
         if score_name == 'deepspcas9':
             model = DeepCas9
-            #model = pickle.load(open(models_dir + '/DeepCas9.pkl', 'rb'))
             sess_path = f"{models_dir}/DeepCas9_Final/PreTrain-Final-False-3-5-7-100-70-40-0.001-550-True-80-60"
             return model, sess_path
     except FileNotFoundError:
@@ -66,6 +67,7 @@ def preprocess_seq(data):
     return DATA_X
 
 
+# === On-target Efficiency Scoring ===
 
 def deepspcas9(cas9_sites, models_dir):
     '''
@@ -100,8 +102,6 @@ def deepspcas9(cas9_sites, models_dir):
     return scores
 
 
-
-# === On-target Efficiency Scoring ===
 def doench2014(cas9_sites, models_dir):
         """
         Doench 2014 'on-target score'
@@ -341,11 +341,6 @@ def cfd_score(seq1, seq2, models_dir):
     return round(score,4)
 
 
-def cfd_scores(seqs,models_dir):
-    scores = []
-    for s in seqs:
-        seq1, seq2 = seqs
-        scores.append(cfd_score(seq1, seq2, models_dir))
 
 def cfd_spec_score(sum_cfd_scores):
     '''
@@ -357,8 +352,8 @@ def cfd_spec_score(sum_cfd_scores):
     return guide_cfd_score
 
 
-def score(input,score_name,models_dir):
-    #input = '/home/thudson/projects/Azimuth_updated/test/cfd_input.txt'
+def score(input,output,score_name,models_dir):
+    #input = '/home/thudson/projects/Azimuth_updated/test/azimuth_input.txt'
     score_dict = {'name': [],
                   'grna_seq':[],
                   'context_seq':[]}
@@ -377,20 +372,47 @@ def score(input,score_name,models_dir):
             seq1,seq2 = seqs
             scores.append(cfd_score(seq1[:-3], seq2, models_dir))
 
-    if score_name == 'azimuth':
-        pass
-    if score_name == 'doench14':
-        pass
+    elif score_name == 'azimuth':
+        scores = azimuth(score_dict['context_seq'], models_dir)
 
-    if score_name == 'deepcpf1':
+    elif score_name == 'doench14':
+        scores = doench2014(score_dict['context_seq'], models_dir)
+
+    elif score_name == 'deepcpf1':
         scores = deepcpf1(score_dict['context_seq'], models_dir)
         scores = [round(x[0],4) for x in scores]
 
-    if score_name == 'deepspcas9':
-        pass
-    if score_name == 'oof':
-        pass
+    elif score_name == 'deepspcas9':
+        scores = deepspcas9(score_dict['context_seq'], models_dir)
+        scores = [round(x[0], 4) for x in scores]
+    elif score_name == 'oof':
+        scores = []
+        for seq in score_dict['context_seq']:
+           scores.append(oofscore(seq)[1])
+    else:
+        print(f"Print {score_name} is not a valid scoring option")
+
+    score_dict['score'] = scores
+
+    with open(output,"w") as out:
+        out.write('\t'.join(score_dict.keys()) + '\n')
+        for i in range(len(score_dict['name'])):
+            line =[]
+            for v in score_dict.values():
+                line.append(str(v[i]))
+            out.write('\t'.join(line) +'\n')
+def parse_args():
+    mainParser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    mainParser.add_argument('-o', "--output", help="output txt file", default="output.txt")
+    mainParser.add_argument('-i', "--input", help="input txt file", required=True)
+    mainParser.add_argument('-s', "--score_name", help="score name (cfd, azimuth,deepspcas9,doench14,oof,deepcpf1)", required=True)
 
 
+def main():
+    models_dir = dirname = os.path.dirname(os.path.realpath(__file__)) + "/models/"
+    args = parse_args()
+    score(args.input, args.output, args.score_name, models_dir)
 
-models_dir = dirname = os.path.dirname(os.path.realpath(__file__))+ "/models/"
+
+if __name__ == "__main__":
+	main()

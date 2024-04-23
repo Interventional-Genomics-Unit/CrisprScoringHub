@@ -17,7 +17,7 @@ conda activate guidescorer
 
 # Usage
 
-The CrisprScoringHub pipeline requires a input text file, output text file, and score name. The pipeline can be run with the following command ``score.py -i /path/to/input.txt -o /path/to/output.txt -s cfd``
+The CrisprScoringHub pipeline requires a input text file, output text file, and score name. The pipeline can be run with the following command ``python score.py -i /path/to/input.txt -o /path/to/output.txt -s cfd``
 
 Below is an example ``input.txt`` file::
 

@@ -10,8 +10,8 @@ import numpy as np
 import tensorflow.compat.v1 as tf1
 from tensorflow.keras.models import load_model
 # Project Modules
-from featurization import featurize_data
-from deepcas_model import DeepCas9
+from models.featurization import featurize_data
+from models.deepcas_model import DeepCas9
 
 
 def load_model_params(score_name: str, models_dir: str):
@@ -353,7 +353,7 @@ def cfd_spec_score(sum_cfd_scores):
 
 
 def score(input,output,score_name,models_dir):
-    #input = '/home/thudson/projects/Azimuth_updated/test/azimuth_input.txt'
+    #input = '/home/thudson/projects/CrisprScoringHub/test/azimuth_input.txt'
     score_dict = {'name': [],
                   'grna_seq':[],
                   'context_seq':[]}
@@ -394,25 +394,27 @@ def score(input,output,score_name,models_dir):
 
     score_dict['score'] = scores
 
-    with open(output,"w") as out:
+    with open(output,'w') as out:
         out.write('\t'.join(score_dict.keys()) + '\n')
         for i in range(len(score_dict['name'])):
             line =[]
             for v in score_dict.values():
                 line.append(str(v[i]))
             out.write('\t'.join(line) +'\n')
-def parse_args():
-    mainParser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    mainParser.add_argument('-o', "--output", help="output txt file", default="output.txt")
-    mainParser.add_argument('-i', "--input", help="input txt file", required=True)
-    mainParser.add_argument('-s', "--score_name", help="score name (cfd, azimuth,deepspcas9,doench14,oof,deepcpf1)", required=True)
 
 
 def main():
-    models_dir = dirname = os.path.dirname(os.path.realpath(__file__)) + "/models/"
-    args = parse_args()
-    score(args.input, args.output, args.score_name, models_dir)
+    mainParser = argparse.ArgumentParser()
 
+    mainParser.add_argument('--output', "-o", help="output txt file", default="output.txt")
+    mainParser.add_argument('--input', "-i", help="input txt file", required=True)
+    mainParser.add_argument('--score_name', "-s",
+                            help="score name (cfd, azimuth,deepspcas9,doench14,oof,deepcpf1)",
+                            required=True)
+
+    models_dir = os.path.dirname(os.path.realpath(__file__)) + "/models/"
+    args = mainParser.parse_args()
+    score(args.input, args.output, args.score_name, models_dir)
 
 if __name__ == "__main__":
 	main()

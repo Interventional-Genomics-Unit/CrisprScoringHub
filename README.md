@@ -47,7 +47,7 @@ spCas9 efficiency score. Predicts the likelihood of getting a spCas9 indel at th
 
 -i --input: text file that incudes guide name, a gRNA sequence that include PAM and a 30bp context sequence (4bp 5', 20bp guide, 3bp PAM, 3bp 5')
 
--s --score_name: deepcas9
+-s --score_name: deepspcas9
 
 *Reference*
 

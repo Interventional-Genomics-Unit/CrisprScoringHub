@@ -9,7 +9,7 @@ git clone https://github.com/Interventional-Genomics-Unit/CrisprScoringHub.git
 
 cd CrisprScoringHub
 
-conda env create --guidescorer --file guidescorer.yaml
+conda env create --name guidescorer --file guidescorer.yaml
 
 conda activate guidescorer
 
